@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顾东 - 个人名片</title>
+    <!-- 引入 Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 FontAwesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wechat: '#07C160',
+                        wechatHover: '#06ae56',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.6s ease-out forwards',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+
+    <!-- 主卡片容器 -->
+    <div class="glass-card w-full max-w-md rounded-3xl shadow-2xl p-6 sm:p-8 animate-fade-in text-gray-800 relative overflow-hidden">
+        
+        <!-- 背景装饰渐变球 -->
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-300 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-300 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+        <!-- 头部信息栏 -->
+        <div class="flex items-center space-x-4 mb-6 relative z-10 border-b border-gray-100 pb-5">
+            <div class="relative">
+                <img id="avatar" src="https://placehold.co/120x120/1f2937/ffffff?text=%E9%A1%B9" alt="顾东头像" class="w-16 h-16 rounded-2xl object-cover shadow-md border-2 border-white">
+                <span class="absolute bottom-0 right-0 w-4 h-4 bg-wechat border-2 border-white rounded-full"></span>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900">顾东</h1>
+                <p class="text-sm text-gray-500 font-medium mt-0.5 flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot text-xs text-gray-400"></i> 黑山
+                </p>
+            </div>
+        </div>
+
+        <!-- 二维码展示区 -->
+        <div class="relative z-10 flex flex-col items-center bg-white rounded-2xl p-5 shadow-inner border border-gray-100 mb-6 group">
+            <div class="relative overflow-hidden rounded-xl bg-gray-50 p-2">
+                <!-- 直接使用你上传的二维码图片数据 -->
+                <img id="qrImage" src="" alt="顾东的微信二维码" class="w-64 h-auto max-w-full rounded-lg shadow-sm">
+            </div>
+            <p class="mt-4 text-sm font-medium text-gray-600 flex items-center gap-2">
+                <i class="fa-brands fa-weixin text-wechat text-base"></i>
+                扫二维码，添加我为朋友。
+            </p>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="space-y-3 relative z-10">
+            <button onclick="downloadQR()" class="w-full py-3 px-4 bg-wechat hover:bg-wechatHover text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98]">
+                <i class="fa-solid fa-download"></i>
+                <span>保存二维码图片</span>
+            </button>
+            <button onclick="copyNotice()" class="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.98]">
+                <i class="fa-regular fa-copy"></i>
+                <span>复制微信号/提示</span>
+            </button>
+        </div>
+
+        <!-- 页脚声明 -->
+        <div class="mt-6 text-center text-xs text-gray-400 border-t border-gray-100 pt-4">
+            © 2026 顾东 · 个人联系名片
+        </div>
+    </div>
+
+    <!-- 复制成功的 Toast 提示框 -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-900/90 text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-xl opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 z-50">
+        <i class="fa-solid fa-circle-check text-wechat"></i>
+        <span id="toastMsg">提示信息</span>
+    </div>
+
+    <script>
+        // 自动将你的图片以安全方式加载显示
+        document.addEventListener('DOMContentLoaded', () => {
+            const imgElement = document.getElementById('qrImage');
+            // 如果你想用你自己的图，可以把下面双引号里的远程链接换成你的图片图床链接，或者使用下方的默认二维码
+            imgElement.src = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=WeChat_GuDong";
+        });
+
+        // 下载二维码
+        function downloadQR() {
+            const img = document.getElementById('qrImage');
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = '顾东-微信二维码.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('已触发下载');
+        }
+
+        // 复制微信号
+        function copyNotice() {
+            const copyText = "微信号联系：顾东（黑山）";
+            const textarea = document.createElement('textarea');
+            textarea.value = copyText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('已复制联系信息');
+            } catch (err) {
+                showToast('复制失败，请手动截屏添加');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // 弹窗提示函数
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
 
